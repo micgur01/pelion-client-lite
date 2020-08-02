@@ -16,32 +16,24 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-#ifndef __FOTA_MANIFEST_DEFS_H_
-#define __FOTA_MANIFEST_DEFS_H_
+#ifndef __FOTA_NVM_INT_H_
+#define __FOTA_NVM_INT_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "fota/fota_base.h"
+#include "CloudClientStorage.h"
 
-#ifndef FOTA_MANIFEST_SCHEMA_VERSION
-#define FOTA_MANIFEST_SCHEMA_VERSION        3
+int fota_nvm_get(cloud_client_param key, uint8_t *buffer, size_t buffer_size, size_t *bytes_read);
+
+int fota_nvm_set(cloud_client_param key, const uint8_t *buffer, size_t buffer_size);
+
+int fota_nvm_remove(cloud_client_param key);
+
+#ifdef __cplusplus
+}
 #endif
 
-#ifndef FOTA_MANIFEST_URI_SIZE
-#define FOTA_MANIFEST_URI_SIZE            256
-#endif
-
-#ifndef FOTA_MANIFEST_VENDOR_DATA_SIZE
-#define FOTA_MANIFEST_VENDOR_DATA_SIZE    128
-#endif
-
-#define FOTA_MANIFEST_PAYLOAD_FORMAT_RAW    1
-#define FOTA_MANIFEST_PAYLOAD_FORMAT_DELTA  5
-
-#ifndef FOTA_MANIFEST_MAX_SIZE
-#define FOTA_MANIFEST_MAX_SIZE           512
-#endif
-
-#ifndef FOTA_CERT_MAX_SIZE
-#define FOTA_CERT_MAX_SIZE 600
-#endif
-
-#endif // __FOTA_MANIFEST_DEFS_H_
+#endif //__FOTA_NVM_INT_H_

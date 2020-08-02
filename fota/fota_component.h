@@ -31,7 +31,7 @@ extern "C" {
 /**
  * Callback to read current firmware, required only if delta supported.
  *
- * \param[out] buf buffer with curr fw data
+ * \param[out] buf buffer with curr fw data.
  * \param[in] offset offset where to read from.
  * \param[in] size output buffer size.
  * \param[in] num_read actual size read.
@@ -48,12 +48,21 @@ typedef int (*fota_component_curr_fw_read)(uint8_t *buf, uint32_t offset, uint32
 typedef int (*fota_component_curr_fw_get_digest)(uint8_t *buf);
 
 /**
+ * Callback called handle post install.
+ *
+ * \return FOTA_STATUS_SUCCESS on success.
+ */
+typedef int (*fota_component_post_install_handler_t)(const char *new_sem_ver);
+
+/**
  * Component description info
  *
  * name component name.
  * factory_version initial version installed on factory in SemVer format.
+ * install_alignment If set to non-zero, fragment sizes returned to the user will be aligned to this value.
  * candidate_iterate_cb callback to candidate iterate firmware function.
  * support_delta if delta update supported for component.
+ * component_post_install_cb callback to for post install component check.
  * curr_fw_read callback to read current firmware. Required only if delta is supported for current component, NULL otherwise.
  * curr_fw_get_digest callback to get current firmware digest. Required only if delta is supported for current component, NULL otherwise.
  * need_reboot if reboot required after installation.
@@ -61,7 +70,9 @@ typedef int (*fota_component_curr_fw_get_digest)(uint8_t *buf);
 typedef struct {
     char name[FOTA_COMPONENT_MAX_NAME_SIZE];
     char factory_version[FOTA_COMPONENT_MAX_SEMVER_STR_SIZE];
+    uint32_t install_alignment;
     fota_candidate_iterate_handler_t candidate_iterate_cb;
+    fota_component_post_install_handler_t component_post_install_cb;
     bool support_delta;
     fota_component_curr_fw_read curr_fw_read;
     fota_component_curr_fw_get_digest curr_fw_get_digest;

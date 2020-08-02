@@ -19,6 +19,8 @@
 
 #ifdef MBED_CLOUD_CLIENT_FOTA_ENABLE
 
+#define TRACE_GROUP "FOTA"
+
 #include "fota/fota.h"
 #include "fota/fota_source.h"
 #include "fota/fota_internal.h"
@@ -43,7 +45,7 @@ void fota_app_defer(uint32_t token)
 
 void fota_app_resume(void)
 {
-    fota_event_handler_defer_with_data(fota_on_resume, NULL, 0);
+    fota_event_handler_defer_with_result(fota_on_resume, 0, 0);
 }
 
 FOTA_WEAK void fota_app_on_download_progress(uint32_t downloaded_size, uint32_t current_chunk_size, uint32_t total_size)

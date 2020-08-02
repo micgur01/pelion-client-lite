@@ -95,7 +95,7 @@ int fota_app_on_complete(int32_t status);
  * Resume Pelion FOTA update.
  *
  * In case update process was interupted - application can restart it by calling this function.
- */
+  */
 void fota_app_resume(void);
 
 /**

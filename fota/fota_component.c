@@ -20,6 +20,8 @@
 
 #ifdef MBED_CLOUD_CLIENT_FOTA_ENABLE
 
+#define TRACE_GROUP "FOTA"
+
 #include "fota/fota_component.h"
 #include "fota/fota_component_internal.h"
 #include "fota/fota_status.h"
@@ -40,7 +42,7 @@ static comp_entry_t comp_table[FOTA_NUM_COMPONENTS];
 #define SPLIT_NUM_BITS 16
 #define MAX_VER 999
 
-void fota_component_init(void)
+void fota_component_clean(void)
 {
     num_components = 0;
     memset(comp_table, 0, sizeof(comp_table));
@@ -82,12 +84,16 @@ void fota_component_set_curr_version(unsigned int comp_id, fota_component_versio
 
 int fota_component_name_to_id(const char *name, unsigned int *comp_id)
 {
-    for (unsigned int i = 0; i < num_components; i++) {
-        if (!strcmp(name, comp_table[i].desc.name)) {
-            *comp_id = i;
+    int i = num_components;
+
+    // One or more components
+    do {
+        if (!strcmp(name, comp_table[num_components - i].desc.name)) {
+            *comp_id = num_components - i;
             return FOTA_STATUS_SUCCESS;
         }
-    }
+    } while (--i);
+
     return FOTA_STATUS_NOT_FOUND;
 }
 
@@ -116,25 +122,33 @@ int fota_component_version_int_to_semver(fota_component_version_t version, char 
 
 int fota_component_version_semver_to_int(const char *sem_ver, fota_component_version_t *version)
 {
-    uint64_t major, minor, split;
+    // This better use signed strtol() instead of strtoul() as it is already used by other code
+    // and there is no need to add more dependencies here. That change saves ~120B.
+    int64_t major, minor, split;
     char *endptr;
     int ret = FOTA_STATUS_SUCCESS;
 
-    major = strtoul(sem_ver, &endptr, 10);
-    minor = strtoul(endptr + 1, &endptr, 10);
-    split = strtoul(endptr + 1, &endptr, 10);
-    FOTA_DBG_ASSERT((endptr-sem_ver) <= FOTA_COMPONENT_MAX_SEMVER_STR_SIZE);
+    major = strtol(sem_ver, &endptr, 10);
+    minor = strtol(endptr + 1, &endptr, 10);
+    split = strtol(endptr + 1, &endptr, 10);
+    FOTA_DBG_ASSERT((endptr - sem_ver) <= FOTA_COMPONENT_MAX_SEMVER_STR_SIZE);
 
-    if ((major > MAX_VER) || (minor > MAX_VER) || (split > MAX_VER)) {
+    if ((major < 0) || (major > MAX_VER) ||
+            (minor < 0) || (minor > MAX_VER) ||
+            (split < 0) || (split > MAX_VER)) {
         ret = FOTA_STATUS_INVALID_ARGUMENT;
+
+        // Unfortunately not all call sites of this handle the error, so this might as well
+        // give stable output on error path too.
+        *version = 0;
+    } else {
+
+        split = MIN(split, MAX_VER);
+        minor = MIN(minor, MAX_VER);
+        major = MIN(major, MAX_VER);
+
+        *version = split | minor << SPLIT_NUM_BITS | major << (SPLIT_NUM_BITS + MINOR_NUM_BITS);
     }
-
-    split = MIN(split, MAX_VER);
-    minor = MIN(minor, MAX_VER);
-    major = MIN(major, MAX_VER);
-
-    *version = split | minor << SPLIT_NUM_BITS | major << (SPLIT_NUM_BITS + MINOR_NUM_BITS);
-
     return ret;
 }
 

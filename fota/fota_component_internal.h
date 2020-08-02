@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 // Component access APIs
-void fota_component_init(void);
+void fota_component_clean(void);
 unsigned int fota_component_num_components(void);
 void fota_component_get_desc(unsigned int comp_id, const fota_component_desc_t * *comp_desc);
 void fota_component_get_curr_version(unsigned int comp_id, fota_component_version_t *version);

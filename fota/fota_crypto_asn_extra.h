@@ -16,27 +16,18 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------
 
-#ifndef __FOTA_CRYPTO_DEFS_H_
-#define __FOTA_CRYPTO_DEFS_H_
+#ifndef __FOTA_CRYPTO_ASN_EXTRA_H_
+#define __FOTA_CRYPTO_ASN_EXTRA_H_
 
-#include "fota/fota_base.h"
+#include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define MBEDTLS_ASN1_ENUMERATED              0x0A
 
+int mbedtls_asn1_get_enumerated_value(unsigned char **p,
+                                      const unsigned char *end,
+                                      int *val);
+int mbedtls_asn1_get_int64(unsigned char **p,
+                           const unsigned char *end,
+                           int64_t *val);
 
-#define FOTA_ENCRYPT_KEY_SIZE 16 /*< AES-128 key size in bytes */
-
-#define FOTA_ENCRYPT_TAG_SIZE 8 /*< AES-CCM tag size in bytes */
-
-#define FOTA_CRYPTO_HASH_SIZE  32  /*< SHA256 digest size in bytes*/
-
-#define FOTA_UPDATE_RAW_PUBLIC_KEY_SIZE 65  // compression byte  | r | s
-#define FOTA_IMAGE_RAW_SIGNATURE_SIZE 64  // raw signature
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif // __FOTA_CRYPTO_DEFS_H_
+#endif  // __FOTA_CRYPTO_ASN_EXTRA_H_
