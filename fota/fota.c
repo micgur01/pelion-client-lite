@@ -230,7 +230,12 @@ int fota_install_verify(const fota_component_desc_t *comp_desc, unsigned int com
 
 int fota_handle_post_install()
 {
-    int ret = FOTA_STATUS_SUCCESS;
+    int ret = fota_bd_init();
+    if (ret) {
+        FOTA_TRACE_ERROR("fota_bd_init failed %d.", ret);
+        goto fail;
+    }
+
 #if (FOTA_NUM_COMPONENTS > 1)
     uint32_t bd_read_size;
     uint32_t bd_prog_size;
@@ -239,12 +244,6 @@ int fota_handle_post_install()
     fota_candidate_ready_header_t comp_header;
     const fota_component_desc_t *comp_desc;
     fota_header_info_t header;
-
-    ret = fota_bd_init();
-    if (ret) {
-        FOTA_TRACE_ERROR("fota_bd_init failed %d.", ret);
-        goto fail;
-    }
 
     ret = fota_bd_get_read_size(&bd_read_size);
     if (ret) {
@@ -280,10 +279,11 @@ int fota_handle_post_install()
     FOTA_TRACE_DEBUG("install verify component name %s, version %" PRIu64 " ", comp_header.comp_name, header.version);
     ret = fota_install_verify(comp_desc, comp_id, header.version);
 
-fail:
 #endif // FOTA_NUM_COMPONENTS > 1
+fail:
     // in case we failed prevent infinite loop, remove FW key and report failure as post installed failed
     fota_nvm_fw_encryption_key_delete();
+    fota_candidate_erase();
     return ret;
 }
 
