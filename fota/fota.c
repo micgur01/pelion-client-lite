@@ -280,10 +280,10 @@ int fota_handle_post_install()
     ret = fota_install_verify(comp_desc, comp_id, header.version);
 
 #endif // FOTA_NUM_COMPONENTS > 1
+    fota_candidate_erase();
 fail:
     // in case we failed prevent infinite loop, remove FW key and report failure as post installed failed
     fota_nvm_fw_encryption_key_delete();
-    fota_candidate_erase();
     return ret;
 }
 
