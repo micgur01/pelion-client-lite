@@ -232,7 +232,7 @@ int fota_handle_post_install()
 {
     int ret = fota_bd_init();
     if (ret) {
-        FOTA_TRACE_ERROR("fota_bd_init failed %d.", ret);
+        FOTA_TRACE_DEBUG("fota_bd_init failed %d.", ret);
         goto fail;
     }
 
